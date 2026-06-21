@@ -2,10 +2,8 @@ require("dotenv").config();
 
 const express = require("express");
 const logRequest = require("./middleware/logger");
-const {
-  validateCreateTodo,
-  validateUpdateTodo,
-} = require("./middleware/validator");
+const { createTodoSchema, updateTodoSchema } = require("./schema");
+const validateTodo = require("./middleware/validator");
 const errorHandler = require("./middleware/errorHandler");
 const app = express();
 app.use(express.json()); // Parse JSON bodies
@@ -26,7 +24,7 @@ app.get("/todos", (req, res, next) => {
 });
 
 // POST New – Create
-app.post("/todos", validateCreateTodo, (req, res, next) => {
+app.post("/todos", validateTodo(createTodoSchema), (req, res, next) => {
   try {
     const body = req.body;
     if (!body.task || typeof body.completed !== "boolean") {
@@ -43,7 +41,7 @@ app.post("/todos", validateCreateTodo, (req, res, next) => {
 });
 
 // PATCH Update – Partial
-app.patch("/todos/:id", validateUpdateTodo, (req, res, next) => {
+app.patch("/todos/:id", validateTodo(updateTodoSchema), (req, res, next) => {
   try {
     const todo = todos.find((t) => t.id === parseInt(req.params.id)); // Array.find()
     if (!todo) return res.status(404).json({ message: "Todo not found" });
