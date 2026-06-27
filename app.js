@@ -20,6 +20,25 @@ app.use(logRequest); //Custom Middleware for Logging
 //   { id: 2, task: "Build CRUD API", completed: false },
 // ];
 
+// GET Completed Tasks via Query Params – Completed Tasks
+app.get("/todos", async (req, res, next) => {
+  try {
+    let filter = {};
+
+    const { completed } = req.query;
+
+    if (completed !== undefined) {
+      filter.completed = completed === "true";
+    }
+
+    const todos = await Todos.find(filter);
+
+    res.status(200).json(todos);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET All – Read
 app.get("/todos", async (req, res, next) => {
   try {
@@ -71,9 +90,9 @@ app.delete("/todos/:id", async (req, res, next) => {
   try {
     const todo = await Todos.findByIdAndDelete(req.params.id);
 
-   if (!todo) {
-     return res.status(404).json({ message: "Todo not found" });
-   }
+    if (!todo) {
+      return res.status(404).json({ message: "Todo not found" });
+    }
 
     res.status(204).send(); // Silent success
   } catch (error) {
